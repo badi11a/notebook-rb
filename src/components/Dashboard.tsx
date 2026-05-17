@@ -5,15 +5,15 @@ import { getUltimoSnapshot, getTiposCambioRecientes, getResumenMensual } from '@
 import type { SnapshotConActivo, TipoCambio, ResumenMensual } from '@/types';
 
 const ESTRUCTURA_CONFIG: Record<string, { label: string; color: string }> = {
-  'raices':      { label: 'Bienes raíces',    color: '#1D9E75' },
-  'previsional': { label: 'Previsional',      color: '#5DCAA5' },
-  'etfs':        { label: 'ETFs',             color: '#378ADD' },
-  'stocks':      { label: 'Stocks',           color: '#E07B39' },
-  'betterplan':  { label: 'Alternativos',     color: '#7F77DD' },
-  'fondos':      { label: 'Fondos Mutuos',    color: '#BA7517' },
-  'cuentas':     { label: 'Cuentas',          color: '#4DB8A0' },
-  'otros':       { label: 'Otros',            color: '#888780' },
-  'pasivo':      { label: 'Pasivos totales',  color: '#E24B4A' },
+  'raices':      { label: 'Real Estate',      color: '#1D9E75' },
+  'previsional': { label: 'Pension',           color: '#5DCAA5' },
+  'etfs':        { label: 'ETFs',              color: '#378ADD' },
+  'stocks':      { label: 'Equities',          color: '#E07B39' },
+  'betterplan':  { label: 'Alternatives',      color: '#7F77DD' },
+  'fondos':      { label: 'Mutual Funds',      color: '#BA7517' },
+  'cuentas':     { label: 'Cash & Accounts',   color: '#4DB8A0' },
+  'otros':       { label: 'Other Assets',      color: '#888780' },
+  'pasivo':      { label: 'Total Liabilities', color: '#E24B4A' },
 };
 
 function getGrupoEstructura(s: SnapshotConActivo): string {
@@ -85,12 +85,12 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="screen active"><div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-tertiary)' }}>Cargando…</div></div>;
+  if (loading) return <div className="screen active"><div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-tertiary)' }}>Loading…</div></div>;
   if (error) return <div className="screen active"><div style={{ padding: '20px', color: 'var(--red-text)' }}>Error: {error}</div></div>;
 
   const estructura = agruparEstructura(snapshots).sort((a, b) => {
-    if (a.label === 'Pasivos totales') return 1;
-    if (b.label === 'Pasivos totales') return -1;
+    if (a.label === 'Total Liabilities') return 1;
+    if (b.label === 'Total Liabilities') return -1;
     return b.total - a.total;
   });
   const getT = (key: string) => estructura.find(g => g.label === ESTRUCTURA_CONFIG[key]?.label)?.total ?? 0;
@@ -101,7 +101,6 @@ export default function Dashboard() {
   const aum = getT('etfs') + getT('stocks') + getT('betterplan') + getT('fondos') + getT('cuentas') + getT('otros');
   const liquido = aum - pasivosTotales;
 
-  // Cálculos para Ratios (Plano mi_patrimonio.html)
   const deudaHipotecaria = snapshots.filter(s => (s.subcategoria || '').toLowerCase().includes('hipotecario')).reduce((sum, s) => sum + Number(s.valor_clp), 0);
   const pasivoCirculante = snapshots.filter(s => {
     const sub = (s.subcategoria || '').toLowerCase();
@@ -122,18 +121,17 @@ export default function Dashboard() {
       if (esInst) institucionesAUM.add(s.institucion);
     }
   });
-  const operadoresCount = institucionesAUM.size;
 
   return (
     <div id="screen-dashboard" className="screen active">
       <div className="metric-grid">
         <div className="metric">
-          <div className="metric-label">Bruto</div>
+          <div className="metric-label">Gross Assets</div>
           <div className="metric-value" style={{ color: 'var(--blue)' }}>{fmtM(patrimonioBruto)}</div>
           {actualRes && anteriorRes ? fmtDelta(actualRes.bruto, anteriorRes.bruto) : <div className="metric-delta">— $0.0M</div>}
         </div>
         <div className="metric">
-          <div className="metric-label">Neto</div>
+          <div className="metric-label">Net Worth</div>
           <div className="metric-value" style={{ color: 'var(--green)' }}>{fmtM(patrimonioNeto)}</div>
           {actualRes && anteriorRes ? fmtDelta(actualRes.neto, anteriorRes.neto) : <div className="metric-delta">— $0.0M</div>}
         </div>
@@ -143,17 +141,17 @@ export default function Dashboard() {
           {actualRes && anteriorRes ? fmtDelta(actualRes.aum, anteriorRes.aum) : <div className="metric-delta">— $0.0M</div>}
         </div>
         <div className="metric">
-          <div className="metric-label">Líquido</div>
+          <div className="metric-label">Liquid Assets</div>
           <div className="metric-value" style={{ color: 'var(--amber-text)' }}>{fmtM(liquido)}</div>
           {actualRes && anteriorRes ? fmtDelta(actualRes.liquido, anteriorRes.liquido) : <div className="metric-delta">— $0.0M</div>}
         </div>
       </div>
 
-      <div className="section-label">Estructura de activos y pasivos</div>
+      <div className="section-label">Asset Allocation</div>
       <div className="card">
         {estructura.map(g => {
-          const isPasivo = g.label === 'Pasivos totales';
-          const totalActivos = estructura.filter(x => x.label !== 'Pasivos totales').reduce((s, x) => s + x.total, 0);
+          const isPasivo = g.label === 'Total Liabilities';
+          const totalActivos = estructura.filter(x => x.label !== 'Total Liabilities').reduce((s, x) => s + x.total, 0);
           const pct = totalActivos > 0 ? (g.total / totalActivos) * 100 : 0;
           const barW = Math.max(...estructura.map(x => x.total)) > 0 ? Math.round((g.total / Math.max(...estructura.map(x => x.total))) * 100) : 0;
           return (
@@ -168,31 +166,31 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div className="section-label">Ratios financieros</div>
+      <div className="section-label">Financial Ratios</div>
       <div className="metric-grid">
         <div className="metric">
-          <div className="metric-label">Deuda / Activos</div>
+          <div className="metric-label">Debt-to-Assets</div>
           <div className="metric-value" style={{ fontSize: '15px' }}>{patrimonioBruto > 0 ? ((pasivosTotales / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
-          <div className="metric-delta">Apalancamiento</div>
+          <div className="metric-delta">Leverage</div>
         </div>
         <div className="metric">
-          <div className="metric-label">Cobertura hipotecaria</div>
+          <div className="metric-label">Mortgage Coverage</div>
           <div className="metric-value" style={{ fontSize: '15px' }}>{deudaHipotecaria > 0 ? (bienesRaices / deudaHipotecaria).toFixed(2) : 0}x</div>
-          <div className="metric-delta">Prop. / Deuda Hip.</div>
+          <div className="metric-delta">Real Estate / Mortgage</div>
         </div>
         <div className="metric">
-          <div className="metric-label">Liquidez inmediata</div>
+          <div className="metric-label">Quick Ratio</div>
           <div className="metric-value" style={{ fontSize: '15px' }}>{pasivoCirculante > 0 ? (cajaPura / pasivoCirculante).toFixed(1) : 0}x</div>
-          <div className="metric-delta">Caja / Pas. Circ.</div>
+          <div className="metric-delta">Cash / Current Liab.</div>
         </div>
         <div className="metric">
-          <div className="metric-label">Solvencia (N/B)</div>
+          <div className="metric-label">Solvency Ratio</div>
           <div className="metric-value" style={{ fontSize: '15px' }}>{patrimonioBruto > 0 ? ((patrimonioNeto / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
-          <div className="metric-delta">Patrimonio real</div>
+          <div className="metric-delta">Real Equity</div>
         </div>
       </div>
 
-      <div className="section-label">Tipos de cambio</div>
+      <div className="section-label">Exchange Rates</div>
       <div className="metric-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <div className="metric"><div className="metric-label">UF</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.uf)}` : '—'}</div></div>
         <div className="metric"><div className="metric-label">USD/CLP</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.usd)}` : '—'}</div></div>
