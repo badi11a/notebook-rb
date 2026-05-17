@@ -153,12 +153,10 @@ export default function Dashboard() {
           const isPasivo = g.label === 'Total Liabilities';
           const totalActivos = estructura.filter(x => x.label !== 'Total Liabilities').reduce((s, x) => s + x.total, 0);
           const pct = totalActivos > 0 ? (g.total / totalActivos) * 100 : 0;
-          const barW = Math.max(...estructura.map(x => x.total)) > 0 ? Math.round((g.total / Math.max(...estructura.map(x => x.total))) * 100) : 0;
           return (
             <div key={g.label} className="asset-row">
               <div className="asset-dot" style={{ background: g.color }}></div>
-              <div style={{ flex: 1 }}><div className="asset-name">{g.label}</div><div className="asset-inst" style={{ fontSize: '9px' }}>{Array.from(g.insts).slice(0, 4).join(' · ')}</div></div>
-              <div className="bar-wrap"><div className="bar-fill" style={{ width: `${barW}%`, background: g.color }}></div></div>
+              <div style={{ flex: 1 }}><div className="asset-name">{g.label}</div><div className="asset-inst">{Array.from(g.insts).slice(0, 4).join(' · ')}</div></div>
               <div className="asset-pct" style={{ color: isPasivo ? 'var(--red-text)' : 'inherit' }}>{isPasivo ? '-' : ''}{pct.toFixed(1).replace('.', ',')}%</div>
               <div className="asset-val" style={{ color: isPasivo ? 'var(--red-text)' : 'inherit' }}>{isPasivo ? '-' : ''}{fmtM(g.total)}</div>
             </div>
@@ -170,31 +168,31 @@ export default function Dashboard() {
       <div className="metric-grid">
         <div className="metric">
           <div className="metric-label">Debt-to-Assets</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>{patrimonioBruto > 0 ? ((pasivosTotales / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{patrimonioBruto > 0 ? ((pasivosTotales / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
           <div className="metric-delta">Leverage</div>
         </div>
         <div className="metric">
           <div className="metric-label">Mortgage Coverage</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>{deudaHipotecaria > 0 ? (bienesRaices / deudaHipotecaria).toFixed(2) : 0}x</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{deudaHipotecaria > 0 ? (bienesRaices / deudaHipotecaria).toFixed(2) : 0}x</div>
           <div className="metric-delta">Real Estate / Mortgage</div>
         </div>
         <div className="metric">
           <div className="metric-label">Quick Ratio</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>{pasivoCirculante > 0 ? (cajaPura / pasivoCirculante).toFixed(1) : 0}x</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{pasivoCirculante > 0 ? (cajaPura / pasivoCirculante).toFixed(1) : 0}x</div>
           <div className="metric-delta">Cash / Current Liab.</div>
         </div>
         <div className="metric">
           <div className="metric-label">Solvency Ratio</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>{patrimonioBruto > 0 ? ((patrimonioNeto / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{patrimonioBruto > 0 ? ((patrimonioNeto / patrimonioBruto) * 100).toFixed(1) : 0}%</div>
           <div className="metric-delta">Real Equity</div>
         </div>
       </div>
 
       <div className="section-label">Exchange Rates</div>
       <div className="metric-grid metric-grid-3">
-        <div className="metric"><div className="metric-label">UF</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.uf)}` : '—'}</div></div>
-        <div className="metric"><div className="metric-label">USD/CLP</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.usd)}` : '—'}</div></div>
-        <div className="metric"><div className="metric-label">UTM</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.utm)}` : '—'}</div></div>
+        <div className="metric"><div className="metric-label">UF</div><div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{tc ? `$${fmtNum(tc.uf)}` : '—'}</div></div>
+        <div className="metric"><div className="metric-label">USD/CLP</div><div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{tc ? `$${fmtNum(tc.usd)}` : '—'}</div></div>
+        <div className="metric"><div className="metric-label">UTM</div><div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>{tc ? `$${fmtNum(tc.utm)}` : '—'}</div></div>
       </div>
     </div>
   );

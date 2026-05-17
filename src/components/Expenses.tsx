@@ -91,7 +91,7 @@ export default function Expenses() {
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
         <span style={{
           background: 'rgba(29,158,117,0.12)', color: '#1D9E75',
-          border: '1px solid rgba(29,158,117,0.25)', fontSize: '10px',
+          border: '1px solid rgba(29,158,117,0.25)', fontSize: 'var(--text-xs)',
           padding: '4px 12px', borderRadius: '20px', fontWeight: 600,
         }}>
           Live Data
@@ -108,21 +108,21 @@ export default function Expenses() {
         </div>
         <div className="metric">
           <div className="metric-label">Largest Category</div>
-          <div className="metric-value" style={{ fontSize: '14px' }}>Vivienda e Hipotecario</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>Vivienda e Hipotecario</div>
           <div className="metric-delta">{((current.housing / currentTotal) * 100).toFixed(0)}% of total</div>
         </div>
         <div className="metric">
           <div className="metric-label">6-Month Average</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>-{fmtM(avgMonthly)}</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>-{fmtM(avgMonthly)}</div>
           <div className="metric-delta">Monthly avg.</div>
         </div>
         <div className="metric">
           <div className="metric-label">Categorization</div>
-          <div className="metric-value" style={{ fontSize: '12px', color: '#1D9E75' }}>Verified</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-sm)', color: '#1D9E75' }}>Verified</div>
           <div className="metric-delta">
             <span style={{
               background: 'rgba(29,158,117,0.15)', color: '#1D9E75',
-              fontSize: '8px', padding: '2px 6px', borderRadius: '10px',
+              fontSize: 'var(--text-xs)', padding: '2px 6px', borderRadius: '10px',
               border: '1px solid rgba(29,158,117,0.3)',
             }}>
               Live
@@ -146,12 +146,12 @@ export default function Expenses() {
                     return <div key={cat} style={{ width: '100%', height: `${segH}px`, background: CATEGORY_COLORS[cat], flexShrink: 0 }}></div>;
                   })}
                 </div>
-                <div style={{ fontSize: '8px', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.month}</div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.month}</div>
               </div>
             );
           })}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '9px', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
           {CATEGORIES.map(cat => (
             <span key={cat} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: CATEGORY_COLORS[cat], display: 'inline-block' }}></span>
@@ -163,22 +163,22 @@ export default function Expenses() {
 
       <div className="section-label">May Breakdown</div>
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text-tertiary)', borderBottom: '1px solid var(--border)', paddingBottom: '6px', marginBottom: '4px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', borderBottom: '1px solid var(--border)', paddingBottom: '6px', marginBottom: '4px' }}>
           <span>ITEM</span>
           <span>AMOUNT</span>
         </div>
         {BREAKDOWN.map((e, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < BREAKDOWN.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div>
-              <div style={{ fontSize: '12px', color: 'var(--text-primary)' }}>{e.item}</div>
-              <div style={{ fontSize: '9px', color: 'var(--text-tertiary)' }}>{CATEGORY_LABELS[e.category as ExpenseCategory] || e.category}</div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>{e.item}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>{CATEGORY_LABELS[e.category as ExpenseCategory] || e.category}</div>
             </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>-{fmtM(e.amount)}</div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>-{fmtM(e.amount)}</div>
           </div>
         ))}
         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', marginTop: '4px', borderTop: '1px solid var(--border)' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>Total</span>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--red-text)' }}>-{fmtM(breakdownTotal)}</span>
+          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>Total</span>
+          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--red-text)' }}>-{fmtM(breakdownTotal)}</span>
         </div>
       </div>
 

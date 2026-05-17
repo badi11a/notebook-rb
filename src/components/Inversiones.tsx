@@ -96,7 +96,7 @@ export default function Inversiones() {
       
       <div className="donut-legend" style={{ marginBottom: '25px', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
         {grupos.map((g) => (
-          <span key={g.label} className="donut-item" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: 'var(--text-secondary)' }}>
+          <span key={g.label} className="donut-item" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
             <span className="donut-dot" style={{ width: '7px', height: '7px', borderRadius: '2px', background: g.color }}></span>
             {g.label} {fmtM(g.total)}
           </span>
@@ -121,16 +121,16 @@ export default function Inversiones() {
                     <div className="asset-dot" style={{ background: g.color }}></div>
                     <div style={{ flex: 1 }}>
                       <div className="asset-name" style={{ fontWeight: 'bold', textTransform: (isCuenta || isOtros) ? 'capitalize' : 'none' }}>{titulo}</div>
-                      <div className="asset-inst" style={{ fontSize: '11px', marginTop: '2px' }}>{subtitulo}</div>
+                      <div className="asset-inst" style={{ fontSize: 'var(--text-xs)', marginTop: '2px' }}>{subtitulo}</div>
                       {!isCuenta && !isOtros && s.deltaPct !== undefined && (
-                        <div style={{ fontSize: '10px', fontWeight: 'bold', color: s.deltaPct >= 0 ? 'var(--green-text)' : 'var(--red-text)', marginTop: '2px' }}>
+                        <div style={{ fontSize: 'var(--text-xs)', fontWeight: 'bold', color: s.deltaPct >= 0 ? 'var(--green-text)' : 'var(--red-text)', marginTop: '2px' }}>
                           {s.deltaPct >= 0 ? '▲' : '▼'} {Math.abs(s.deltaPct).toFixed(1)}%
                         </div>
                       )}
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div className="asset-val" style={{ fontWeight: '500' }}>{fmtM(s.valor_clp)}</div>
-                      <div style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>{pct.toFixed(1).replace('.', ',')}%</div>
+                      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>{pct.toFixed(1).replace('.', ',')}%</div>
                     </div>
                   </div>
                 );

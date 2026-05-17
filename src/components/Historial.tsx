@@ -31,19 +31,19 @@ export default function Historial() {
   }, []);
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: '13px' }}>
+    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
       Cargando…
     </div>
   );
 
   if (error) return (
-    <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', fontSize: '12px', color: 'var(--red-text)' }}>
+    <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)', color: 'var(--red-text)' }}>
       {error}
     </div>
   );
 
   if (resumen.length === 0) return (
-    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: '13px' }}>
+    <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
       Sin historial — ingresa snapshots en Entry
     </div>
   );
@@ -69,10 +69,10 @@ export default function Historial() {
               {/* Fila superior: mes + net worth */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                 <div>
-                  <div style={{ fontSize: '13px', color: 'var(--text)' }}>{formatMes(r.fecha)}</div>
+                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text)' }}>{formatMes(r.fecha)}</div>
                   {delta !== null && (
                     <div style={{
-                      fontSize: '11px',
+                      fontSize: 'var(--text-xs)',
                       marginTop: '2px',
                       color: delta >= 0 ? 'var(--green-text)' : 'var(--red-text)',
                     }}>
@@ -81,8 +81,8 @@ export default function Historial() {
                   )}
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '9px', color: 'var(--text-tertiary)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: '2px' }}>Net Worth</div>
-                  <div style={{ fontSize: '22px', color: 'var(--green)', lineHeight: 1 }}>{fmtM(Number(r.neto))}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: '2px' }}>Net Worth</div>
+                  <div style={{ fontSize: 'var(--text-2xl)', color: 'var(--green)', lineHeight: 1 }}>{fmtM(Number(r.neto))}</div>
                 </div>
               </div>
 
@@ -95,8 +95,8 @@ export default function Historial() {
                   { label: 'Liquid',       value: r.liquido, color: 'var(--amber-text)'},
                 ].map(({ label, value, color }) => (
                   <div key={label} style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', padding: '8px 10px' }}>
-                    <div style={{ fontSize: '9px', color: 'var(--text-tertiary)', letterSpacing: '.04em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</div>
-                    <div style={{ fontSize: '14px', color }}>{fmtM(Number(value))}</div>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', letterSpacing: '.04em', textTransform: 'uppercase', marginBottom: '3px' }}>{label}</div>
+                    <div style={{ fontSize: 'var(--text-base)', color }}>{fmtM(Number(value))}</div>
                   </div>
                 ))}
               </div>
