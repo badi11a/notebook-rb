@@ -22,20 +22,8 @@ const NAV_ITEMS: { id: Screen; icon: string; label: string }[] = [
 export default function Home() {
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
 
-  const now = new Date();
-  const dateLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
   return (
     <div className="app">
-      <div className="header">
-        <div className="header-top">
-          <div>
-            <div className="app-name">Personal Wealth</div>
-            <div className="header-date">{dateLabel}</div>
-          </div>
-        </div>
-      </div>
-
       <div className="content">
         {activeScreen === 'dashboard'   && <Dashboard />}
         {activeScreen === 'inversiones' && <Inversiones />}
