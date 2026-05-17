@@ -84,7 +84,7 @@ export default function Liabilities() {
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
         <span style={{
           background: 'rgba(29,158,117,0.12)', color: '#1D9E75',
-          border: '1px solid rgba(29,158,117,0.25)', fontSize: '10px',
+          border: '1px solid rgba(29,158,117,0.25)', fontSize: 'var(--text-xs)',
           padding: '4px 12px', borderRadius: '20px', fontWeight: 600,
         }}>
           Live Data
@@ -99,17 +99,17 @@ export default function Liabilities() {
         </div>
         <div className="metric">
           <div className="metric-label">Monthly Payments</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>-{fmtM(totalMonthly)}</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>-{fmtM(totalMonthly)}</div>
           <div className="metric-delta">Debt service</div>
         </div>
         <div className="metric">
           <div className="metric-label">Avg. Interest Rate</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>5.8%</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>5.8%</div>
           <div className="metric-delta">Weighted avg.</div>
         </div>
         <div className="metric">
           <div className="metric-label">Debt-to-Income</div>
-          <div className="metric-value" style={{ fontSize: '15px' }}>22.4%</div>
+          <div className="metric-value" style={{ fontSize: 'var(--text-base)' }}>22.4%</div>
           <div className="metric-delta">Monthly ratio</div>
         </div>
       </div>
@@ -122,19 +122,19 @@ export default function Liabilities() {
             <div key={i} style={{ padding: '14px 0', borderBottom: i < LIABILITIES_DATA.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{l.name}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{l.name}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '2px' }}>
                     {l.institution} · {l.interestRate}% annual · {l.termYears}yr term
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--red-text)' }}>-{fmtM(l.outstanding)}</div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>outstanding</div>
+                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--red-text)' }}>-{fmtM(l.outstanding)}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '2px' }}>outstanding</div>
                 </div>
               </div>
 
               <div style={{ marginBottom: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text-tertiary)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginBottom: '4px' }}>
                   <span>Capital paid: {paidPct}%</span>
                   <span>Remaining: {100 - paidPct}%</span>
                 </div>
@@ -143,7 +143,7 @@ export default function Liabilities() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '16px', fontSize: '10px', color: 'var(--text-secondary)' }}>
+              <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                 <span>Monthly: <strong style={{ color: 'var(--text-primary)' }}>-{fmtM(l.monthlyPayment)}</strong></span>
                 <span>Next due: <strong style={{ color: 'var(--text-primary)' }}>{l.nextDueDate}</strong></span>
               </div>
@@ -154,7 +154,7 @@ export default function Liabilities() {
 
       <div className="section-label">Amortization Projection</div>
       <div className="card">
-        <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginBottom: '14px' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginBottom: '14px' }}>
           Monthly liability evolution
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '90px' }}>
@@ -169,12 +169,12 @@ export default function Liabilities() {
                   <div style={{ width: '100%', height: `${interestH}px`, background: '#E24B4A', opacity: 0.65 }}></div>
                   <div style={{ width: '100%', height: `${principalH}px`, background: '#1D9E75' }}></div>
                 </div>
-                <div style={{ fontSize: '8px', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.year}</div>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px' }}>{d.year}</div>
               </div>
             );
           })}
         </div>
-        <div style={{ display: 'flex', gap: '14px', marginTop: '10px', fontSize: '9px', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', gap: '14px', marginTop: '10px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#1D9E75', display: 'inline-block' }}></span>
             Total Debt
