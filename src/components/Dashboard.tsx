@@ -191,7 +191,7 @@ export default function Dashboard() {
       </div>
 
       <div className="section-label">Exchange Rates</div>
-      <div className="metric-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="metric-grid metric-grid-3">
         <div className="metric"><div className="metric-label">UF</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.uf)}` : '—'}</div></div>
         <div className="metric"><div className="metric-label">USD/CLP</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.usd)}` : '—'}</div></div>
         <div className="metric"><div className="metric-label">UTM</div><div className="metric-value" style={{ fontSize: '15px' }}>{tc ? `$${fmtNum(tc.utm)}` : '—'}</div></div>

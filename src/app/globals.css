@@ -60,19 +60,17 @@ body {
   position: relative;
 }
 .header {
-  padding: 20px 20px 0;
+  padding: 16px 20px 14px;
   background: var(--bg);
   position: sticky;
   top: 0;
   z-index: 10;
   border-bottom: 0.5px solid var(--border);
-  padding-bottom: 12px;
 }
 .header-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
 }
 .app-name {
   font-size: 11px;
@@ -123,7 +121,7 @@ body {
   color: var(--text);
   box-shadow: 0 0 0 0.5px var(--border-md);
 }
-.content { padding: 20px; }
+.content { padding: 20px 20px 90px; }
 .screen { display: none; }
 .screen.active { display: block; }
 .section-label {
@@ -136,18 +134,21 @@ body {
 }
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 20px;
 }
 .metric {
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
-  padding: 12px;
+  padding: 14px;
 }
-.metric-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 5px; letter-spacing:.02em; }
-.metric-value { font-size: 18px; }
-.metric-delta { font-size: 10px; margin-top: 3px; color: var(--text-tertiary); }
+.metric-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; letter-spacing:.02em; }
+.metric-value { font-size: 22px; }
+.metric-delta { font-size: 10px; margin-top: 4px; color: var(--text-tertiary); }
+.metric-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .card {
   background: var(--bg);
   border: 0.5px solid var(--border);
@@ -258,6 +259,37 @@ body {
 .donut-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; justify-content: center; }
 .donut-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-secondary); }
 .donut-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  background: var(--bg);
+  border-top: 0.5px solid var(--border);
+  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+  z-index: 20;
+}
+.bottom-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: 'Georgia', serif;
+  font-size: 9px;
+  cursor: pointer;
+  transition: color .15s;
+}
+.bottom-nav-btn i { font-size: 20px; }
+.bottom-nav-btn.active { color: var(--green); }
 @media (max-width: 480px) {
   .app { max-width: 100%; }
+  .bottom-nav { max-width: 100%; }
 }

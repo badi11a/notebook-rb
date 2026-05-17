@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error('[app error]', error);
   }, [error]);
 
   return (
@@ -56,7 +56,7 @@ export default function Error({
           Algo salió mal
         </div>
         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-          {error.message || 'Error inesperado. Intenta nuevamente.'}
+          Error inesperado. Intenta nuevamente.
         </div>
         <button
           onClick={reset}

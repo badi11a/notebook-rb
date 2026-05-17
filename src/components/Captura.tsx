@@ -92,7 +92,8 @@ export default function Captura() {
       const snaps = await getUltimoSnapshot();
       setPrevSnaps(new Map(snaps.map(s => [s.activo_id, s])));
     } catch (e: any) {
-      setSaveMsg(`Error: ${e.message}`);
+      console.error('[captura save]', e);
+      setSaveMsg('Error al guardar. Verifica los datos e intenta nuevamente.');
     } finally {
       setSaving(false);
     }

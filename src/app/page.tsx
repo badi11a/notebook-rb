@@ -10,8 +10,20 @@ import Expenses from '@/components/Expenses';
 
 type Screen = 'dashboard' | 'inversiones' | 'captura' | 'historial' | 'liabilities' | 'expenses';
 
+const NAV_ITEMS: { id: Screen; icon: string; label: string }[] = [
+  { id: 'dashboard',   icon: 'ti-layout-dashboard', label: 'Dashboard' },
+  { id: 'inversiones', icon: 'ti-chart-pie',         label: 'Invest' },
+  { id: 'liabilities', icon: 'ti-credit-card',       label: 'Liabilities' },
+  { id: 'expenses',    icon: 'ti-wallet',             label: 'Expenses' },
+  { id: 'captura',     icon: 'ti-edit',               label: 'Entry' },
+  { id: 'historial',   icon: 'ti-history',            label: 'History' },
+];
+
 export default function Home() {
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
+
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <div className="app">
@@ -19,55 +31,8 @@ export default function Home() {
         <div className="header-top">
           <div>
             <div className="app-name">Personal Wealth</div>
-            <div className="header-date">Updated May 1, 2026</div>
+            <div className="header-date">{dateLabel}</div>
           </div>
-          <span className="pill pill-green">
-            <i className="ti ti-trending-up" style={{ fontSize: '12px' }}></i> +$4.6M this month
-          </span>
-        </div>
-        <div className="nav">
-          <button
-            className={`nav-btn ${activeScreen === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('dashboard')}
-          >
-            <i className="ti ti-layout-dashboard"></i>
-            <span>Dashboard</span>
-          </button>
-          <button
-            className={`nav-btn ${activeScreen === 'inversiones' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('inversiones')}
-          >
-            <i className="ti ti-chart-pie"></i>
-            <span>Investments</span>
-          </button>
-          <button
-            className={`nav-btn ${activeScreen === 'liabilities' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('liabilities')}
-          >
-            <i className="ti ti-credit-card"></i>
-            <span>Liabilities</span>
-          </button>
-          <button
-            className={`nav-btn ${activeScreen === 'expenses' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('expenses')}
-          >
-            <i className="ti ti-wallet"></i>
-            <span>Expenses</span>
-          </button>
-          <button
-            className={`nav-btn ${activeScreen === 'captura' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('captura')}
-          >
-            <i className="ti ti-edit"></i>
-            <span>Data Entry</span>
-          </button>
-          <button
-            className={`nav-btn ${activeScreen === 'historial' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('historial')}
-          >
-            <i className="ti ti-history"></i>
-            <span>History</span>
-          </button>
         </div>
       </div>
 
@@ -79,6 +44,19 @@ export default function Home() {
         {activeScreen === 'captura'     && <Captura />}
         {activeScreen === 'historial'   && <Historial />}
       </div>
+
+      <nav className="bottom-nav">
+        {NAV_ITEMS.map(({ id, icon, label }) => (
+          <button
+            key={id}
+            className={`bottom-nav-btn ${activeScreen === id ? 'active' : ''}`}
+            onClick={() => setActiveScreen(id)}
+          >
+            <i className={`ti ${icon}`}></i>
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
