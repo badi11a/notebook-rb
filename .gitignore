@@ -1,21 +1,31 @@
-# environment
-.env.local
-.env*.local
-.env
-
 # dependencies
 node_modules/
 
-# next.js
+# Next.js build output
 .next/
 out/
 
-# logs
-*.log
-npm-debug.log*
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# misc
-.DS_Store
-*.pem
+# Supabase local state
+supabase/.temp
 
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Editor/IDE
+.claude/
+.cursor/
+.vscode/
+
+# Data files (sensitive financial data)
 *.csv
+
+# OS
+.DS_Store
+Thumbs.db
