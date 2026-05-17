@@ -48,21 +48,21 @@ export default function LoginPage() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{
-            fontSize: '11px',
+            fontSize: 'var(--text-xs)',
             letterSpacing: '.12em',
             textTransform: 'uppercase',
             color: 'var(--text-tertiary)',
             marginBottom: '8px',
           }}>
-            Balance Master
+            Notebook
           </div>
-          <div style={{ fontSize: '20px', color: 'var(--text)' }}>Acceso</div>
+          <div style={{ fontSize: 'var(--text-xl)', color: 'var(--text)' }}>Acceso</div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '12px' }}>
             <div style={{
-              fontSize: '10px',
+              fontSize: 'var(--text-xs)',
               color: 'var(--text-secondary)',
               letterSpacing: '.04em',
               marginBottom: '4px',
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
           <div style={{ marginBottom: '20px' }}>
             <div style={{
-              fontSize: '10px',
+              fontSize: 'var(--text-xs)',
               color: 'var(--text-secondary)',
               letterSpacing: '.04em',
               marginBottom: '4px',
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
           {error && (
             <div style={{
-              fontSize: '12px',
+              fontSize: 'var(--text-sm)',
               color: 'var(--red-text)',
               background: 'var(--red-bg)',
               padding: '10px 12px',

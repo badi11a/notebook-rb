@@ -20,13 +20,13 @@ export default function NotFound() {
         textAlign: 'center',
       }}>
         <div style={{
-          fontSize: '11px',
+          fontSize: 'var(--text-xs)',
           letterSpacing: '.12em',
           textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
           marginBottom: '12px',
         }}>
-          Balance Master
+          Notebook
         </div>
         <div style={{
           fontSize: '48px',
@@ -36,10 +36,10 @@ export default function NotFound() {
         }}>
           404
         </div>
-        <div style={{ fontSize: '16px', color: 'var(--text)', marginBottom: '8px' }}>
+        <div style={{ fontSize: 'var(--text-lg)', color: 'var(--text)', marginBottom: '8px' }}>
           Página no encontrada
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: '24px' }}>
           La ruta que buscas no existe.
         </div>
         <Link href="/" style={{ textDecoration: 'none' }}>

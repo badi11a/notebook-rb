@@ -32,13 +32,13 @@ export default function Error({
         textAlign: 'center',
       }}>
         <div style={{
-          fontSize: '11px',
+          fontSize: 'var(--text-xs)',
           letterSpacing: '.12em',
           textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
           marginBottom: '12px',
         }}>
-          Balance Master
+          Notebook
         </div>
         <div style={{
           width: '40px',
@@ -50,12 +50,12 @@ export default function Error({
           justifyContent: 'center',
           margin: '0 auto 16px',
         }}>
-          <i className="ti ti-alert-triangle" style={{ fontSize: '20px', color: 'var(--red-text)' }} />
+          <i className="ti ti-alert-triangle" style={{ fontSize: 'var(--text-xl)', color: 'var(--red-text)' }} />
         </div>
-        <div style={{ fontSize: '16px', color: 'var(--text)', marginBottom: '8px' }}>
+        <div style={{ fontSize: 'var(--text-lg)', color: 'var(--text)', marginBottom: '8px' }}>
           Algo salió mal
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: '24px' }}>
           Error inesperado. Intenta nuevamente.
         </div>
         <button

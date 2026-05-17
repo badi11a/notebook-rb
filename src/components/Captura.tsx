@@ -114,7 +114,7 @@ export default function Captura() {
 
   if (loading) return (
     <div id="screen-captura" className="screen active">
-      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: '13px' }}>
+      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
         Cargando…
       </div>
     </div>
@@ -122,7 +122,7 @@ export default function Captura() {
 
   if (loadError) return (
     <div id="screen-captura" className="screen active">
-      <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', fontSize: '12px', color: 'var(--red-text)' }}>
+      <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)', color: 'var(--red-text)' }}>
         {loadError}
       </div>
     </div>
@@ -198,7 +198,7 @@ export default function Captura() {
                 >
                   <div className="inp-label" style={{ lineHeight: 1.3 }}>
                     {activo.nombre_producto}
-                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '1px' }}>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '1px' }}>
                       {activo.institucion}
                       {activo.ticker ? ` · ${activo.ticker}` : ''}
                     </div>
@@ -222,7 +222,7 @@ export default function Captura() {
         <div style={{
           padding: '10px 14px',
           borderRadius: 'var(--radius-sm)',
-          fontSize: '12px',
+          fontSize: 'var(--text-sm)',
           marginBottom: '4px',
           background: saveMsg.startsWith('Error') ? 'var(--red-bg)' : 'var(--green-bg)',
           color: saveMsg.startsWith('Error') ? 'var(--red-text)' : 'var(--green-text)',
@@ -237,7 +237,7 @@ export default function Captura() {
         disabled={saving}
         style={{ opacity: saving ? 0.6 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
       >
-        <i className="ti ti-device-floppy" style={{ fontSize: '15px', verticalAlign: '-2px', marginRight: '6px' }}></i>
+        <i className="ti ti-device-floppy" style={{ fontSize: 'var(--text-base)', verticalAlign: '-2px', marginRight: '6px' }}></i>
         {saving ? 'Guardando…' : 'Guardar snapshot'}
       </button>
 
