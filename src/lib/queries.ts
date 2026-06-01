@@ -54,10 +54,15 @@ export async function createActivo(activo: {
 
 export async function syncResumenMensual(): Promise<void> {
   const supabase = getSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const inicioMes = new Date().toISOString().substring(0, 7) + '-01'
 
   const { data: snaps, error } = await supabase
     .from('snapshots')
     .select('activo_id, fecha, valor_clp, activos!inner(clase, categoria, subcategoria, institucion)')
+    .gte('fecha', inicioMes)
     .order('fecha', { ascending: true })
 
   if (error) throw error
@@ -81,69 +86,36 @@ export async function syncResumenMensual(): Promise<void> {
     return 'caja'
   }
 
-  // Último valor de cada activo dentro de cada mes
-  const porMesActivo = new Map<string, Map<string, { valor_clp: number; cat: string }>>()
+  // Último valor de cada activo dentro del mes
+  const activosMap = new Map<string, { valor_clp: number; cat: string }>()
   for (const s of snaps ?? []) {
-    const mesKey = s.fecha.substring(0, 7)
-    if (!porMesActivo.has(mesKey)) {
-      porMesActivo.set(mesKey, new Map())
-    }
-    const cat = getCategoriaPlan(s.activos)
-    porMesActivo.get(mesKey)!.set(s.activo_id, { valor_clp: Number(s.valor_clp), cat })
+    activosMap.set(s.activo_id, { valor_clp: Number(s.valor_clp), cat: getCategoriaPlan(s.activos) })
   }
 
-  // Sumar por mes
-  const resumenPorMes = new Map<string, { fecha: string; bruto: number; pasivos: number; aum: number }>()
-  for (const [mesKey, activosMap] of porMesActivo) {
-    let bruto = 0
-    let pasivos = 0
-    let aum = 0
-    for (const [, v] of activosMap) {
-      if (v.cat === 'pasivo') {
-        pasivos += v.valor_clp
-      } else {
-        bruto += v.valor_clp
-        if (['financiera', 'alternativa', 'caja'].includes(v.cat)) {
-          aum += v.valor_clp
-        }
-      }
+  let bruto = 0, pasivos = 0, aum = 0
+  for (const [, v] of activosMap) {
+    if (v.cat === 'pasivo') {
+      pasivos += v.valor_clp
+    } else {
+      bruto += v.valor_clp
+      if (['financiera', 'alternativa', 'caja'].includes(v.cat)) aum += v.valor_clp
     }
-    const fechaCanonica = `${mesKey}-01`
-    resumenPorMes.set(mesKey, { fecha: fechaCanonica, bruto, pasivos, aum })
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
-  const uid = user.id
-
-  const rows = Array.from(resumenPorMes.values()).map(d => ({
-    usuario_id: uid,
-    fecha: d.fecha,
-    bruto: Math.round(d.bruto),
-    pasivos: Math.round(d.pasivos),
-    neto: Math.round(d.bruto - d.pasivos),
-    aum: Math.round(d.aum),
-    liquido: Math.round(d.aum - d.pasivos),
-  }))
-
-  if (rows.length > 0) {
-    const { data: idsToDelete } = await supabase
-      .from('resumen_mensual')
-      .select('id')
-
-    if (idsToDelete && idsToDelete.length > 0) {
-      const { error: delError } = await supabase
-        .from('resumen_mensual')
-        .delete()
-        .in('id', idsToDelete.map((r: any) => r.id))
-      if (delError) throw delError
-    }
-
-    const { error: insError } = await supabase
-      .from('resumen_mensual')
-      .upsert(rows, { onConflict: 'usuario_id,fecha' })
-    if (insError) throw insError
+  const row = {
+    usuario_id: user.id,
+    fecha: inicioMes,
+    bruto: Math.round(bruto),
+    pasivos: Math.round(pasivos),
+    neto: Math.round(bruto - pasivos),
+    aum: Math.round(aum),
+    liquido: Math.round(aum - pasivos),
   }
+
+  const { error: upsertError } = await supabase
+    .from('resumen_mensual')
+    .upsert(row, { onConflict: 'usuario_id,fecha' })
+  if (upsertError) throw upsertError
 }
 
 export async function getSnapshotsPorFecha(fecha: string): Promise<SnapshotConActivo[]> {
@@ -270,6 +242,7 @@ export async function getSnapshotsComparativa(): Promise<{ actual: SnapshotConAc
     .from('snapshots')
     .select('fecha')
     .order('fecha', { ascending: false })
+    .limit(200)
 
   const counts = new Map<string, number>()
   for (const row of fechasData ?? []) {
@@ -373,6 +346,7 @@ export async function getSnapshotsPrevios(fecha: string): Promise<SnapshotConAct
     .select('fecha')
     .lt('fecha', fecha)
     .order('fecha', { ascending: false })
+    .limit(200)
 
   if (fechasError) throw fechasError
 
@@ -430,6 +404,21 @@ export async function insertSnapshot(
       { activo_id, fecha, valor_original, tipo_cambio_clp, valor_clp },
       { onConflict: 'activo_id,fecha' },
     )
+  if (error) throw error
+}
+
+export async function insertSnapshots(rows: Array<{
+  activo_id: string
+  fecha: string
+  valor_original: number
+  tipo_cambio_clp: number
+  valor_clp: number
+}>): Promise<void> {
+  if (rows.length === 0) return
+  const supabase = getSupabaseClient()
+  const { error } = await supabase
+    .from('snapshots')
+    .upsert(rows, { onConflict: 'activo_id,fecha' })
   if (error) throw error
 }
 

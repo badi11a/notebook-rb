@@ -8,7 +8,7 @@ import {
   getSnapshotsPrevios,
   getTiposCambioPorFecha,
   getTiposCambioRecientes,
-  insertSnapshot,
+  insertSnapshots,
   insertTipoCambio,
   updateActivoEstado,
   createActivo,
@@ -196,7 +196,7 @@ export default function Captura() {
         await insertTipoCambio(fecha, ufN, usdN, utmN);
       }
 
-      let count = 0;
+      const rows: { activo_id: string; fecha: string; valor_original: number; tipo_cambio_clp: number; valor_clp: number }[] = [];
       for (const activo of activos) {
         const raw = valores[activo.id]?.trim();
         if (raw === '' || raw === undefined || raw === null) continue;
@@ -210,9 +210,10 @@ export default function Captura() {
         if (m === 'UTM') tc = utmN;
         if (tc === 0) continue;
 
-        await insertSnapshot(activo.id, fecha, valorOriginal, tc, valorOriginal * tc);
-        count++;
+        rows.push({ activo_id: activo.id, fecha, valor_original: valorOriginal, tipo_cambio_clp: tc, valor_clp: valorOriginal * tc });
       }
+      await insertSnapshots(rows);
+      const count = rows.length;
 
       setSaveMsg(`✓ ${count} snapshot${count !== 1 ? 's' : ''} guardados`);
       await syncResumenMensual();

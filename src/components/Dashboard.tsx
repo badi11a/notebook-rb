@@ -47,12 +47,12 @@ function fmtDelta(actual: number, anterior: number): JSX.Element {
 
 function fmtNum(n: number): string { return (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 }); }
 
-function agruparEstructura(snapshots: SnapshotConActivo[]) {
+function agruparEstructura(snapshots: SnapshotConActivo[], grupoCache: Map<string, string>) {
   const grupos = new Map<string, { label: string; color: string; total: number; insts: Set<string> }>();
   const orden = ['raices', 'previsional', 'etfs', 'stocks', 'betterplan', 'fondos', 'cuentas', 'otros', 'pasivo'];
   orden.forEach(key => grupos.set(key, { ...ESTRUCTURA_CONFIG[key], total: 0, insts: new Set() }));
   for (const s of snapshots) {
-    const key = getGrupoEstructura(s);
+    const key = grupoCache.get(s.activo_id) ?? 'otros';
     const g = grupos.get(key);
     if (!g) continue;
     g.total += Number(s.valor_clp) || 0;
@@ -82,15 +82,17 @@ export default function Dashboard() {
   if (loading) return <div className="screen active"><div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-tertiary)' }}>Loading…</div></div>;
   if (error) return <div className="screen active"><div style={{ padding: '20px', color: 'var(--red-text)' }}>Error: {error}</div></div>;
 
-  const estructura = agruparEstructura(snapshots).sort((a, b) => {
+  const grupoCache = new Map(snapshots.map(s => [s.activo_id, getGrupoEstructura(s)]));
+
+  const estructura = agruparEstructura(snapshots, grupoCache).sort((a, b) => {
     if (a.label === 'Total Liabilities') return 1;
     if (b.label === 'Total Liabilities') return -1;
     return b.total - a.total;
   });
   const getT = (key: string) => estructura.find(g => g.label === ESTRUCTURA_CONFIG[key]?.label)?.total ?? 0;
 
-  const patrimonioBruto = snapshots.filter(s => getGrupoEstructura(s) !== 'pasivo').reduce((sum, s) => sum + (Number(s.valor_clp) || 0), 0);
-  const pasivosTotales = snapshots.filter(s => getGrupoEstructura(s) === 'pasivo').reduce((sum, s) => sum + (Number(s.valor_clp) || 0), 0);
+  const patrimonioBruto = snapshots.filter(s => grupoCache.get(s.activo_id) !== 'pasivo').reduce((sum, s) => sum + (Number(s.valor_clp) || 0), 0);
+  const pasivosTotales = snapshots.filter(s => grupoCache.get(s.activo_id) === 'pasivo').reduce((sum, s) => sum + (Number(s.valor_clp) || 0), 0);
   const patrimonioNeto = patrimonioBruto - pasivosTotales;
   const aum = getT('etfs') + getT('stocks') + getT('betterplan') + getT('fondos') + getT('cuentas') + getT('otros');
   const liquido = aum - pasivosTotales;
@@ -108,8 +110,8 @@ export default function Dashboard() {
 
   const institucionesAUM = new Set<string>();
   snapshots.forEach(s => {
-    const cat = getGrupoEstructura(s);
-    if (['etfs', 'stocks', 'betterplan', 'fondos', 'cuentas', 'otros'].includes(cat) && s.valor_clp > 0) {
+    const cat = grupoCache.get(s.activo_id);
+    if (cat && ['etfs', 'stocks', 'betterplan', 'fondos', 'cuentas', 'otros'].includes(cat) && s.valor_clp > 0) {
       const inst = (s.institucion || '').toLowerCase();
       const esInst = !inst.includes('cash') && !inst.includes('honorarios') && !inst.includes('castro') && !inst.includes('badilla') && inst !== '(n/a)';
       if (esInst) institucionesAUM.add(s.institucion);
