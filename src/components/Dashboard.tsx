@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getUltimoSnapshot, getTiposCambioRecientes, getResumenMensual } from '@/lib/queries';
+import { fmtM } from '@/lib/format';
 import type { SnapshotConActivo, TipoCambio, ResumenMensual } from '@/types';
 
 const ESTRUCTURA_CONFIG: Record<string, { label: string; color: string }> = {
@@ -34,13 +35,6 @@ function getGrupoEstructura(s: SnapshotConActivo): string {
   return 'otros';
 }
 
-function fmtM(n: number): string {
-  const absN = Math.round(Math.abs(n));
-  const sign = n < 0 ? '-' : '';
-  if (absN >= 1_000_000) return `${sign}$${(absN / 1_000_000).toFixed(1)}M`;
-  if (absN >= 1_000)     return `${sign}$${Math.round(absN / 1_000)}k`;
-  return `${sign}$${absN}`;
-}
 
 function fmtDelta(actual: number, anterior: number): JSX.Element {
   const v1 = Number(actual) || 0;

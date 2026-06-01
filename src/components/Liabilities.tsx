@@ -1,51 +1,67 @@
 'use client';
 
-const LIABILITIES_DATA = [
+import { useEffect, useState } from 'react';
+import { getUltimoSnapshot } from '@/lib/queries';
+import { fmtM } from '@/lib/format';
+import type { SnapshotConActivo } from '@/types';
+
+interface LiabilityMeta {
+  activoKey: string;
+  name: string;
+  institution: string;
+  totalAmount: number;
+  monthlyPayment: number;
+  nextDueDate: string;
+  interestRate: number;
+  termYears: number;
+}
+
+const LIABILITIES_META: LiabilityMeta[] = [
   {
+    activoKey: 'Hipotecario BCI',
     name: 'Hipotecario BCI',
     institution: 'Banco BCI',
     totalAmount: 100_000_000,
-    outstanding: 61_911_128,
     monthlyPayment: 530_000,
     nextDueDate: 'Jun 5, 2026',
     interestRate: 3.85,
     termYears: 25,
   },
   {
+    activoKey: 'Hipotecario Coopeuch',
     name: 'Hipotecario Coopeuch',
     institution: 'Coopeuch',
     totalAmount: 100_000_000,
-    outstanding: 65_707_845,
     monthlyPayment: 545_000,
     nextDueDate: 'Jun 10, 2026',
     interestRate: 3.95,
     termYears: 25,
   },
   {
+    activoKey: 'Cheques Pie Huanuco',
     name: 'Cheques Pie Huanuco',
     institution: 'Inmobiliaria Activa',
     totalAmount: 21_730_000,
-    outstanding: 16_960_000,
     monthlyPayment: 530_000,
     nextDueDate: 'Jun 1, 2026',
     interestRate: 0,
     termYears: 3,
   },
   {
+    activoKey: 'Impuestos SII (177 UTM)',
     name: 'Impuestos SII (177 UTM)',
     institution: 'SII',
     totalAmount: 12_494_076,
-    outstanding: 12_494_076,
     monthlyPayment: 0,
     nextDueDate: 'Por definir',
     interestRate: 0,
     termYears: 1,
   },
   {
+    activoKey: 'Mastercard Black',
     name: 'Mastercard Black',
     institution: 'Banco BCI',
     totalAmount: 1_112_920,
-    outstanding: 1_112_920,
     monthlyPayment: 1_112_920,
     nextDueDate: 'Jun 5, 2026',
     interestRate: 24.0,
@@ -66,17 +82,55 @@ const AMORT_DATA = [
   { year: 'may-26', principal: 158_185_969, interest: 0 },
 ];
 
-function fmtM(n: number): string {
-  const absN = Math.round(Math.abs(n));
-  if (absN >= 1_000_000) return `$${(absN / 1_000_000).toFixed(1)}M`;
-  if (absN >= 1_000) return `$${Math.round(absN / 1_000)}k`;
-  return `$${absN}`;
-}
 
 export default function Liabilities() {
-  const totalOutstanding = LIABILITIES_DATA.reduce((s, l) => s + l.outstanding, 0);
-  const totalMonthly = LIABILITIES_DATA.reduce((s, l) => s + l.monthlyPayment, 0);
+  const [snapshotMap, setSnapshotMap] = useState<Map<string, SnapshotConActivo>>(new Map());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getUltimoSnapshot()
+      .then(snaps => {
+        const map = new Map<string, SnapshotConActivo>();
+        for (const s of snaps) {
+          if ((s.clase || '').toLowerCase() === 'pasivo') {
+            map.set(s.nombre_producto, s);
+          }
+        }
+        setSnapshotMap(map);
+      })
+      .catch(e => { console.error(e); setError(e.message); })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const liabilities = LIABILITIES_META.map(l => {
+    const snap = snapshotMap.get(l.activoKey);
+    return {
+      ...l,
+      snapshot: snap,
+      outstanding: snap ? Number(snap.valor_clp) : 0,
+    };
+  });
+
+  const totalOutstanding = liabilities.reduce((s, l) => s + l.outstanding, 0);
+  const totalMonthly = LIABILITIES_META.reduce((s, l) => s + l.monthlyPayment, 0);
   const maxAmort = Math.max(...AMORT_DATA.map(d => d.principal + d.interest));
+
+  if (loading) return (
+    <div className="screen active">
+      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
+        Cargando…
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="screen active">
+      <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)', color: 'var(--red-text)' }}>
+        {error}
+      </div>
+    </div>
+  );
 
   return (
     <div id="screen-liabilities" className="screen active">
@@ -95,7 +149,7 @@ export default function Liabilities() {
         <div className="metric">
           <div className="metric-label">Total Outstanding</div>
           <div className="metric-value" style={{ color: 'var(--red-text)' }}>-{fmtM(totalOutstanding)}</div>
-          <div className="metric-delta">{LIABILITIES_DATA.length} active liabilities</div>
+          <div className="metric-delta">{liabilities.length} active liabilities</div>
         </div>
         <div className="metric">
           <div className="metric-label">Monthly Payments</div>
@@ -116,10 +170,10 @@ export default function Liabilities() {
 
       <div className="section-label">Active Liabilities</div>
       <div className="card">
-        {LIABILITIES_DATA.map((l, i) => {
-          const paidPct = Math.round(((l.totalAmount - l.outstanding) / l.totalAmount) * 100);
+        {liabilities.map((l, i) => {
+          const paidPct = l.totalAmount > 0 ? Math.round(((l.totalAmount - l.outstanding) / l.totalAmount) * 100) : 0;
           return (
-            <div key={i} style={{ padding: '14px 0', borderBottom: i < LIABILITIES_DATA.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <div key={i} style={{ padding: '14px 0', borderBottom: i < liabilities.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <div>
                   <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{l.name}</div>
@@ -146,6 +200,11 @@ export default function Liabilities() {
               <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                 <span>Monthly: <strong style={{ color: 'var(--text-primary)' }}>-{fmtM(l.monthlyPayment)}</strong></span>
                 <span>Next due: <strong style={{ color: 'var(--text-primary)' }}>{l.nextDueDate}</strong></span>
+                {l.snapshot && (
+                  <span style={{ color: 'var(--text-tertiary)' }}>
+                    last: {l.snapshot.fecha}
+                  </span>
+                )}
               </div>
             </div>
           );

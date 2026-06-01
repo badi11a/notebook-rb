@@ -13,6 +13,139 @@ export async function getActivosActivos(): Promise<Activo[]> {
   return data ?? []
 }
 
+export async function getActivosInactivos(): Promise<Activo[]> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from('activos')
+    .select('*')
+    .eq('estado', 'inactivo')
+    .order('clase')
+    .order('institucion')
+  if (error) throw error
+  return data ?? []
+}
+
+export async function updateActivoEstado(id: string, estado: 'activo' | 'inactivo'): Promise<void> {
+  const supabase = getSupabaseClient()
+  const { error } = await supabase
+    .from('activos')
+    .update({ estado })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function createActivo(activo: {
+  clase: string
+  categoria: string
+  subcategoria: string | null
+  institucion: string
+  nombre_producto: string
+  moneda_base: string
+  ticker: string | null
+}): Promise<void> {
+  const supabase = getSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('No autenticado')
+  const { error } = await supabase
+    .from('activos')
+    .insert({ ...activo, usuario_id: user.id, estado: 'activo' })
+  if (error) throw error
+}
+
+export async function syncResumenMensual(): Promise<void> {
+  const supabase = getSupabaseClient()
+
+  const { data: snaps, error } = await supabase
+    .from('snapshots')
+    .select('activo_id, fecha, valor_clp, activos!inner(clase, categoria, subcategoria, institucion)')
+    .order('fecha', { ascending: true })
+
+  if (error) throw error
+
+  function getCategoriaPlan(row: any): string {
+    const clase = (row.clase || '').toLowerCase()
+    const cat   = (row.categoria || '').toLowerCase()
+    const sub   = (row.subcategoria || '').toLowerCase()
+    const inst  = (row.institucion || '').toLowerCase()
+    if (clase.includes('pasivo')) return 'pasivo'
+    if (cat.includes('fijo')) {
+      if (sub.includes('propiedades')) return 'raices'
+      if (sub.includes('afp') || sub.includes('apv')) return 'previsional'
+    }
+    if (inst.includes('betterplan')) return 'alternativa'
+    if (sub.includes('etf')) return 'financiera'
+    if (sub.includes('acción') || sub.includes('accion')) return 'financiera'
+    if (cat.includes('fondo') || sub.includes('fondo')) return 'financiera'
+    if (sub.includes('ahorro') || sub.includes('vista') || sub.includes('corriente')) return 'caja'
+    if (cat.includes('inversión') || cat.includes('inversion')) return 'financiera'
+    return 'caja'
+  }
+
+  // Último valor de cada activo dentro de cada mes
+  const porMesActivo = new Map<string, Map<string, { valor_clp: number; cat: string }>>()
+  for (const s of snaps ?? []) {
+    const mesKey = s.fecha.substring(0, 7)
+    if (!porMesActivo.has(mesKey)) {
+      porMesActivo.set(mesKey, new Map())
+    }
+    const cat = getCategoriaPlan(s.activos)
+    porMesActivo.get(mesKey)!.set(s.activo_id, { valor_clp: Number(s.valor_clp), cat })
+  }
+
+  // Sumar por mes
+  const resumenPorMes = new Map<string, { fecha: string; bruto: number; pasivos: number; aum: number }>()
+  for (const [mesKey, activosMap] of porMesActivo) {
+    let bruto = 0
+    let pasivos = 0
+    let aum = 0
+    for (const [, v] of activosMap) {
+      if (v.cat === 'pasivo') {
+        pasivos += v.valor_clp
+      } else {
+        bruto += v.valor_clp
+        if (['financiera', 'alternativa', 'caja'].includes(v.cat)) {
+          aum += v.valor_clp
+        }
+      }
+    }
+    const fechaCanonica = `${mesKey}-01`
+    resumenPorMes.set(mesKey, { fecha: fechaCanonica, bruto, pasivos, aum })
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const uid = user.id
+
+  const rows = Array.from(resumenPorMes.values()).map(d => ({
+    usuario_id: uid,
+    fecha: d.fecha,
+    bruto: Math.round(d.bruto),
+    pasivos: Math.round(d.pasivos),
+    neto: Math.round(d.bruto - d.pasivos),
+    aum: Math.round(d.aum),
+    liquido: Math.round(d.aum - d.pasivos),
+  }))
+
+  if (rows.length > 0) {
+    const { data: idsToDelete } = await supabase
+      .from('resumen_mensual')
+      .select('id')
+
+    if (idsToDelete && idsToDelete.length > 0) {
+      const { error: delError } = await supabase
+        .from('resumen_mensual')
+        .delete()
+        .in('id', idsToDelete.map((r: any) => r.id))
+      if (delError) throw delError
+    }
+
+    const { error: insError } = await supabase
+      .from('resumen_mensual')
+      .upsert(rows, { onConflict: 'usuario_id,fecha' })
+    if (insError) throw insError
+  }
+}
+
 export async function getSnapshotsPorFecha(fecha: string): Promise<SnapshotConActivo[]> {
   const supabase = getSupabaseClient()
   const { data, error } = await supabase
@@ -44,54 +177,46 @@ export async function getSnapshotsPorFecha(fecha: string): Promise<SnapshotConAc
 // Determina la última fecha "válida" (con más de 2 registros) y devuelve los snapshots de esa fecha exacta
 export async function getUltimoSnapshot(): Promise<SnapshotConActivo[]> {
   const supabase = getSupabaseClient()
-  
-  // 1. Obtener todas las fechas para encontrar la última válida
-  const { data: fechasData, error: fechasError } = await supabase
-    .from('snapshots')
-    .select('fecha')
-    .order('fecha', { ascending: false })
-  
-  if (fechasError) throw fechasError
 
-  const counts = new Map<string, number>()
-  for (const row of fechasData ?? []) {
-    counts.set(row.fecha, (counts.get(row.fecha) ?? 0) + 1)
-  }
+  const hoy = new Date().toISOString().split('T')[0]
+  const inicioMes = hoy.substring(0, 7) + '-01'
 
-  const ultimaFechaValida = Array.from(counts.entries())
-    .find(([_, count]) => count > 2)?.[0]
-
-  if (!ultimaFechaValida) return []
-
-  // 2. Obtener snapshots solo de esa fecha
   const { data, error } = await supabase
     .from('snapshots')
     .select(`
       id, activo_id, fecha, valor_original, tipo_cambio_clp, valor_clp, created_at,
       activos!inner(nombre_producto, institucion, clase, categoria, subcategoria, moneda_base, ticker, estado)
     `)
-    .eq('fecha', ultimaFechaValida)
+    .eq('activos.estado', 'activo')
+    .gte('fecha', inicioMes)
+    .order('fecha', { ascending: false })
 
   if (error) throw error
 
-  return (data ?? [])
-    .filter((row: any) => row.activos.estado === 'activo')
-    .map((row: any) => ({
-      id: row.id,
-      activo_id: row.activo_id,
-      fecha: row.fecha,
-      valor_original: row.valor_original,
-      tipo_cambio_clp: row.tipo_cambio_clp,
-      valor_clp: row.valor_clp,
-      created_at: row.created_at,
-      nombre_producto: row.activos.nombre_producto,
-      institucion: row.activos.institucion,
-      clase: row.activos.clase,
-      categoria: row.activos.categoria,
-      subcategoria: row.activos.subcategoria,
-      moneda_base: row.activos.moneda_base,
-      ticker: row.activos.ticker,
-    }))
+  // Último snapshot de cada activo dentro del mes
+  const porActivo = new Map<string, any>()
+  for (const row of data ?? []) {
+    if (!porActivo.has(row.activo_id)) {
+      porActivo.set(row.activo_id, row)
+    }
+  }
+
+  return Array.from(porActivo.values()).map((row: any) => ({
+    id: row.id,
+    activo_id: row.activo_id,
+    fecha: row.fecha,
+    valor_original: row.valor_original,
+    tipo_cambio_clp: row.tipo_cambio_clp,
+    valor_clp: row.valor_clp,
+    created_at: row.created_at,
+    nombre_producto: row.activos.nombre_producto,
+    institucion: row.activos.institucion,
+    clase: row.activos.clase,
+    categoria: row.activos.categoria,
+    subcategoria: row.activos.subcategoria,
+    moneda_base: row.activos.moneda_base,
+    ticker: row.activos.ticker,
+  }))
 }
 
 // GROUP BY fecha equivalente con agregación client-side. Ignora fechas con <= 2 registros.
@@ -204,7 +329,17 @@ export async function getResumenMensual(): Promise<ResumenMensual[]> {
     .select('*')
     .order('fecha', { ascending: true })
   if (error) throw error
-  return data ?? []
+
+  // Deduplicar por mes: solo la fila con fecha canónica (YYYY-MM-01)
+  const porMes = new Map<string, ResumenMensual>()
+  for (const row of data ?? []) {
+    if (!row.fecha.endsWith('-01')) continue
+    const mesKey = row.fecha.substring(0, 7)
+    if (!porMes.has(mesKey)) {
+      porMes.set(mesKey, row)
+    }
+  }
+  return Array.from(porMes.values())
 }
 
 export async function getTiposCambioRecientes(): Promise<TipoCambio | null> {
@@ -217,6 +352,68 @@ export async function getTiposCambioRecientes(): Promise<TipoCambio | null> {
     .maybeSingle()
   if (error) throw error
   return data
+}
+
+export async function getTiposCambioPorFecha(fecha: string): Promise<TipoCambio | null> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase
+    .from('tipos_cambio')
+    .select('*')
+    .eq('fecha', fecha)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+export async function getSnapshotsPrevios(fecha: string): Promise<SnapshotConActivo[]> {
+  const supabase = getSupabaseClient()
+
+  const { data: fechasData, error: fechasError } = await supabase
+    .from('snapshots')
+    .select('fecha')
+    .lt('fecha', fecha)
+    .order('fecha', { ascending: false })
+
+  if (fechasError) throw fechasError
+
+  const counts = new Map<string, number>()
+  for (const row of fechasData ?? []) {
+    counts.set(row.fecha, (counts.get(row.fecha) ?? 0) + 1)
+  }
+
+  const fechaPrevia = Array.from(counts.entries())
+    .find(([_, count]) => count > 2)?.[0]
+
+  if (!fechaPrevia) return []
+
+  const { data, error } = await supabase
+    .from('snapshots')
+    .select(`
+      id, activo_id, fecha, valor_original, tipo_cambio_clp, valor_clp, created_at,
+      activos!inner(nombre_producto, institucion, clase, categoria, subcategoria, moneda_base, ticker, estado)
+    `)
+    .eq('fecha', fechaPrevia)
+
+  if (error) throw error
+
+  return (data ?? [])
+    .filter((row: any) => row.activos.estado === 'activo')
+    .map((row: any) => ({
+      id: row.id,
+      activo_id: row.activo_id,
+      fecha: row.fecha,
+      valor_original: row.valor_original,
+      tipo_cambio_clp: row.tipo_cambio_clp,
+      valor_clp: row.valor_clp,
+      created_at: row.created_at,
+      nombre_producto: row.activos.nombre_producto,
+      institucion: row.activos.institucion,
+      clase: row.activos.clase,
+      categoria: row.activos.categoria,
+      subcategoria: row.activos.subcategoria,
+      moneda_base: row.activos.moneda_base,
+      ticker: row.activos.ticker,
+    }))
 }
 
 export async function insertSnapshot(

@@ -1,5 +1,7 @@
 'use client';
 
+import { fmtM } from '@/lib/format';
+
 type ExpenseCategory = 'housing' | 'food' | 'transport' | 'utilities' | 'healthcare' | 'other';
 
 interface MonthData {
@@ -65,13 +67,6 @@ const CATEGORIES: ExpenseCategory[] = ['housing', 'food', 'transport', 'utilitie
 
 function getTotal(d: MonthData): number {
   return d.housing + d.food + d.transport + d.utilities + d.healthcare + d.other;
-}
-
-function fmtM(n: number): string {
-  const absN = Math.round(Math.abs(n));
-  if (absN >= 1_000_000) return `$${(absN / 1_000_000).toFixed(1)}M`;
-  if (absN >= 1_000) return `$${Math.round(absN / 1_000)}k`;
-  return `$${absN}`;
 }
 
 export default function Expenses() {

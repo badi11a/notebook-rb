@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { getSnapshotsComparativa } from '@/lib/queries';
+import { fmtM } from '@/lib/format';
 import type { SnapshotConActivo } from '@/types';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -29,13 +30,6 @@ function getGrupoInvest(s: SnapshotConActivo): string {
   return 'otros';
 }
 
-function fmtM(n: number): string {
-  const absN = Math.round(Math.abs(n));
-  const sign = n < 0 ? '-' : '';
-  if (absN >= 1_000_000) return `${sign}$${(absN / 1_000_000).toFixed(1)}M`;
-  if (absN >= 1_000)     return `${sign}$${Math.round(absN / 1_000)}k`;
-  return `${sign}$${absN}`;
-}
 
 export default function Inversiones() {
   const [data, setData] = useState<{ actual: SnapshotConActivo[], anterior: SnapshotConActivo[] }>({ actual: [], anterior: [] });
@@ -87,6 +81,14 @@ export default function Inversiones() {
 
   if (loading) return <div className="screen active"><div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-tertiary)' }}>Cargando…</div></div>;
   if (error) return <div className="screen active"><div style={{ padding: '20px', color: 'var(--red-text)' }}>Error al cargar inversiones</div></div>;
+
+  if (grupos.length === 0) return (
+    <div className="screen active">
+      <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
+        Sin datos de inversión — ingresa snapshots en Entry
+      </div>
+    </div>
+  );
 
   return (
     <div id="screen-inversiones" className="screen active">
